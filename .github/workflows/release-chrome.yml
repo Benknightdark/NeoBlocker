@@ -59,7 +59,7 @@ jobs:
       - name: Submit to Chrome Web Store
         run: npx wxt submit --chrome-zip .output/lionblock-${{ steps.get_version.outputs.version }}-chrome.zip
         env:
-          WXT_SUBMIT_CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
-          WXT_SUBMIT_CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-          WXT_SUBMIT_CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
-          WXT_SUBMIT_CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
