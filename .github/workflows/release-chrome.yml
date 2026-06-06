@@ -7,6 +7,9 @@ on:
     types:
       - closed
 
+permissions:
+  contents: write
+
 jobs:
   release:
     # 只有在 PR 被成功 merge 至 main（而非單純關閉）時執行發佈
@@ -16,6 +19,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,6 +30,19 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
+
+      - name: Bump package version
+        id: bump_version
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 自動進行 patch 版號更新，並不自動產生 git tag
+          NEW_VERSION=$(npm version patch --no-git-tag-version)
+          
+          git add package.json package-lock.json
+          git commit -m "chore(release): bump version to $NEW_VERSION [skip ci]"
+          git push origin main
 
       - name: Build DNR Rules
         run: npm run build:dnr
