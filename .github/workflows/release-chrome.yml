@@ -1,76 +1,13 @@
 name: Release Chrome Extension
 
 on:
-  workflow_run:
-    workflows: ["CD (Continuous Delivery)"]
-    types:
-      - completed
   pull_request:
     branches:
       - main
     types:
       - closed
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
-  prepare-release:
-    # 只有當 CD 成功，且是在 develop 分支運行完時才執行
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'develop' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          ref: develop
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Bump package version
-        id: bump_version
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # 自動進行 patch 版號更新，並不自動產生 git tag
-          NEW_VERSION=$(npm version patch --no-git-tag-version)
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
-          
-          git add package.json package-lock.json
-          git commit -m "chore(release): bump version to $NEW_VERSION [skip ci]"
-          git push origin develop
-
-      - name: Build DNR Rules
-        run: npm run build:dnr
-
-      - name: Build and Zip Extension
-        run: npm run zip
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: extension-zip
-          path: .output/lionblock-*.zip
-
-      - name: Create Pull Request to Main
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr create \
-            --base main \
-            --head develop \
-            --title "chore: release ${{ steps.bump_version.outputs.NEW_VERSION }}" \
-            --body "Automated release PR to merge develop into main after successful tests." || echo "Pull Request already exists or could not be created."
-
   release:
     # 只有在 PR 被成功 merge 至 main（而非單純關閉）時執行發佈
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
@@ -89,15 +26,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Download Build Artifact
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: release-chrome.yml
-          branch: develop
-          name: extension-zip
-          path: .output/
-          workflow_conclusion: success
+      - name: Build DNR Rules
+        run: npm run build:dnr
+
+      - name: Build and Zip Extension
+        run: npm run zip
 
       - name: Get Version
         id: get_version
