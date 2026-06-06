@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neo AdBlocker 隱私權政策</title>
+  <meta name="description" content="Neo AdBlocker 隱私權政策（不蒐集個資、僅本地規則與設定）。" />
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans TC","PingFang TC",sans-serif;line-height:1.6;margin:0;padding:40px;background:#f7f7f8;color:#0f172a}
+    main{max-width:860px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+    h1{margin-top:0;font-size:28px}
+    h2{margin-top:28px;font-size:20px}
+    code{background:#f1f5f9;padding:2px 6px;border-radius:6px}
+    .muted{color:#64748b}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Neo AdBlocker 隱私權政策</h1>
+    <p class="muted">最後更新：2025-08-25</p>
+
+    <p>Neo AdBlocker 重視您的隱私。我們的設計原則是：僅為提供廣告與追蹤封鎖之必要功能而運作，<strong>不蒐集、不傳輸</strong>任何個人資料。</p>
+
+    <h2>我們如何處理資料</h2>
+    <ul>
+      <li><strong>不蒐集個人資訊：</strong>不讀取或傳輸您的瀏覽內容、輸入的文字、帳號資訊或歷史紀錄。</li>
+      <li><strong>僅本地儲存：</strong>白名單與自訂規則僅儲存在瀏覽器的 <code>chrome.storage</code>（本機或同步），不會上傳至任何伺服器。</li>
+      <li><strong>網路封鎖：</strong>使用 Chrome 的 <code>Declarative Net Request</code>（MV3）在本地比對規則封鎖廣告與追蹤請求。</li>
+      <li><strong>不與第三方分享：</strong>我們不出售、交換或分享任何使用者資料。</li>
+    </ul>
+
+    <h2>權限使用說明</h2>
+    <ul>
+      <li><code>declarativeNetRequest</code>：在網路層封鎖廣告與追蹤。</li>
+      <li><code>declarativeNetRequestFeedback</code>：僅用於除錯顯示命中規則。</li>
+      <li><code>tabs</code>：讀取目前分頁的網域，以支援站點白名單切換。</li>
+      <li><code>storage</code>：儲存白名單與自訂規則。</li>
+      <li><code>scripting</code>：可選的外觀過濾（只注入 CSS 隱藏常見廣告容器，不執行遠端程式碼）。</li>
+    </ul>
+
+    <h2>網站存取權限（Host Permissions）</h2>
+    <p>僅用於兩項功能：</p>
+    <ol>
+      <li><strong>外觀過濾（可選）：</strong>在頁面載入時注入少量 CSS 隱藏 <code>ins.adsbygoogle</code>、<code>#google_ads_iframe</code> 等常見廣告節點。<br>不讀取或上傳頁面內容與表單資料。</li>
+      <li><strong>站點白名單：</strong>當使用者加入白名單後，在該站停用外觀過濾並以 <code>allowAllRequests</code> 放行請求。</li>
+    </ol>
+
+    <h2>聯絡我們</h2>
+    <p>若對本政策有任何疑問，請來信：<a href="mailto:yourname@example.com">yourname@example.com</a>（請換成你的 Email）。</p>
+  </main>
+</body>
+</html>

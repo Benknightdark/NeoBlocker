@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      /* DOOMSDAY TERMINAL POPUP STYLING */
+      :root {
+        --color-neon: #39ff14; /* Matrix Green */
+        --color-neon-dim: rgba(57, 255, 20, 0.3);
+        --color-bg: #090d09;
+        --color-panel: #111a11;
+        --color-border: #223322;
+        --color-danger: #ff3300;
+        --color-danger-dim: rgba(255, 51, 0, 0.2);
+      }
+
+      body {
+        margin: 0;
+        padding: 12px;
+        width: 320px;
+        background-color: var(--color-bg);
+        color: var(--color-neon);
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 12px;
+        overflow: hidden;
+        position: relative;
+        text-shadow: 0 0 2px var(--color-neon-dim);
+      }
+
+      /* CRT Scanline and Screen Curve Effect */
+      body::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%),
+                    linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+        z-index: 999;
+        background-size: 100% 4px, 4px 100%;
+        pointer-events: none;
+      }
+
+      /* CRT Glow animation */
+      @keyframes monitor-glow {
+        0% { opacity: 0.98; }
+        50% { opacity: 1; }
+        100% { opacity: 0.98; }
+      }
+
+      .terminal {
+        border: 2px solid var(--color-border);
+        background-color: var(--color-panel);
+        padding: 14px;
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 0 10px var(--color-neon-dim);
+        animation: monitor-glow 0.2s infinite;
+        position: relative;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px double var(--color-border);
+        padding-bottom: 6px;
+        margin-bottom: 12px;
+      }
+
+      .title {
+        font-weight: bold;
+        letter-spacing: 1.5px;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--color-neon);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--color-neon);
+      }
+
+      .dot.bypassed {
+        background-color: var(--color-danger);
+        box-shadow: 0 0 8px var(--color-danger);
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        50% { opacity: 0; }
+      }
+
+      .section {
+        margin-bottom: 12px;
+        background: rgba(0,0,0,0.4);
+        padding: 8px;
+        border: 1px solid var(--color-border);
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+      }
+
+      .label {
+        color: #88aa88;
+        font-size: 10px;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: 14px;
+        font-weight: bold;
+        word-break: break-all;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .stat-card {
+        border: 1px solid var(--color-border);
+        background: rgba(0, 0, 0, 0.3);
+        padding: 6px 8px;
+      }
+
+      .stat-val {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: bold;
+        color: var(--color-bg);
+        background-color: var(--color-neon);
+        border: 1px solid var(--color-neon);
+        box-shadow: 0 0 5px var(--color-neon-dim);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      button:hover {
+        background-color: var(--color-bg);
+        color: var(--color-neon);
+        box-shadow: 0 0 10px var(--color-neon);
+      }
+
+      button.danger-mode {
+        background-color: var(--color-danger);
+        border-color: var(--color-danger);
+        color: #ffffff;
+      }
+
+      button.danger-mode:hover {
+        background-color: var(--color-bg);
+        color: var(--color-danger);
+        box-shadow: 0 0 10px var(--color-danger);
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 9px;
+        color: #557755;
+        margin-top: 10px;
+        border-top: 1px dashed var(--color-border);
+        padding-top: 6px;
+        text-transform: uppercase;
+      }
+
+      /* Scanline animation */
+      @keyframes scanline {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100%); }
+      }
+
+      .scan {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 10px;
+        background: linear-gradient(to bottom, rgba(57,255,20,0), rgba(57,255,20,0.1) 50%, rgba(57,255,20,0) 100%);
+        animation: scanline 4s linear infinite;
+        pointer-events: none;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="terminal">
+      <div class="scan"></div>
+
+      <div class="header">
+        <div class="title">NEO-SHIELD v1.0.0</div>
+        <div class="status-indicator">
+          <div class="dot" id="indicator-dot"></div>
+          <span id="indicator-text">防護中</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="label">目標網域</div>
+        <div class="value" id="host">正在定位目標...</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">防護核心</div>
+          <div class="stat-val">DNR_V3</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">已封鎖威脅</div>
+          <div class="stat-val" id="threats-count">0</div>
+        </div>
+      </div>
+
+      <button id="toggle">載入中...</button>
+
+      <div class="footer">
+        末日防禦協定已啟動
+      </div>
+    </div>
+    <script src="./popup.ts" type="module"></script>
+  </body>
+</html>

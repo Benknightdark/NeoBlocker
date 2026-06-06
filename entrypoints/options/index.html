@@ -1,0 +1,385 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Neo Blocker 核心主控台</title>
+  <style>
+    /* CRT PHOSPHOR TERMINAL OPTIONS DESIGN */
+    :root {
+      --color-neon: #39ff14; /* Matrix Green */
+      --color-neon-dim: rgba(57, 255, 20, 0.2);
+      --color-neon-bright: #77ff55;
+      --color-bg: #070a07;
+      --color-panel: #0d140d;
+      --color-border: #1a2a1a;
+      --color-warning: #ffb000;
+      --color-warning-dim: rgba(255, 176, 0, 0.2);
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background-color: var(--color-bg);
+      color: var(--color-neon);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      text-shadow: 0 0 2px var(--color-neon-dim);
+      position: relative;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    /* CRT scanline and flickering overlay */
+    body::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 9999;
+      background-size: 100% 5px, 5px 100%;
+      pointer-events: none;
+    }
+
+    @keyframes monitor-flicker {
+      0% { opacity: 0.99; }
+      50% { opacity: 1; }
+      100% { opacity: 0.99; }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      border: 2px solid var(--color-border);
+      background-color: var(--color-panel);
+      padding: 24px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 0 15px var(--color-neon-dim);
+      animation: monitor-flicker 0.25s infinite;
+      position: relative;
+    }
+
+    /* Scan animation */
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    .scan-bar {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 12px;
+      background: linear-gradient(to bottom, rgba(57,255,20,0), rgba(57,255,20,0.12) 50%, rgba(57,255,20,0) 100%);
+      animation: scan 6s linear infinite;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    header {
+      border-bottom: 2px double var(--color-border);
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .system-status {
+      font-size: 11px;
+      color: var(--color-neon-bright);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .system-status span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-neon);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--color-neon);
+      margin-right: 6px;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0.3; }
+    }
+
+    .row {
+      margin-bottom: 24px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--color-border);
+      padding: 16px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-neon-bright);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      background-color: #030503;
+      border: 1px solid var(--color-border);
+      color: var(--color-neon);
+      padding: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+    }
+
+    textarea:focus {
+      border-color: var(--color-neon);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.8), 0 0 5px var(--color-neon-dim);
+    }
+
+    .tip {
+      color: var(--color-warning);
+      font-size: 11px;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 1px var(--color-warning-dim);
+    }
+
+    .tip::before {
+      content: "[WARNING] ";
+      font-weight: bold;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: var(--color-neon);
+      border: 1px solid var(--color-neon);
+      color: var(--color-bg);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 8px var(--color-neon-dim);
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background-color: var(--color-bg);
+      color: var(--color-neon);
+      box-shadow: 0 0 15px var(--color-neon);
+    }
+
+    #status {
+      font-weight: bold;
+      color: var(--color-neon-bright);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* custom scrollbar */
+    textarea::-webkit-scrollbar {
+      width: 8px;
+    }
+    textarea::-webkit-scrollbar-track {
+      background: #050705;
+      border-left: 1px solid var(--color-border);
+    }
+    textarea::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+    }
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: var(--color-neon-dim);
+    }
+
+    /* 防禦模組開關樣式 */
+    .shield-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .shield-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px dashed var(--color-border);
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .shield-item:hover {
+      border-color: var(--color-neon);
+      background: rgba(57, 255, 20, 0.05);
+    }
+
+    .shield-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shield-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--color-neon-bright);
+    }
+
+    .shield-desc {
+      font-size: 11px;
+      color: #88aa88;
+      margin-top: 2px;
+    }
+
+    /* CRT Switch Style Checkbox */
+    .crt-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 20px;
+    }
+
+    .crt-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .crt-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 51, 0, 0.2); /* 預設關閉為紅色調 */
+      border: 1px solid var(--color-danger);
+      transition: .3s;
+      box-shadow: inset 0 0 5px rgba(255,51,0,0.5);
+    }
+
+    .crt-slider:before {
+      position: absolute;
+      content: "OFF";
+      text-align: center;
+      line-height: 16px;
+      font-size: 8px;
+      font-weight: bold;
+      color: #ffffff;
+      height: 16px;
+      width: 20px;
+      left: 1px;
+      bottom: 1px;
+      background-color: var(--color-danger);
+      transition: .3s;
+      box-shadow: 0 0 5px var(--color-danger);
+    }
+
+    input:checked + .crt-slider {
+      background-color: rgba(57, 255, 20, 0.2); /* 開啟為綠色調 */
+      border-color: var(--color-neon);
+      box-shadow: inset 0 0 5px rgba(57,255,20,0.5);
+    }
+
+    input:checked + .crt-slider:before {
+      content: "ON";
+      color: var(--color-bg);
+      background-color: var(--color-neon);
+      transform: translateX(24px);
+      box-shadow: 0 0 5px var(--color-neon);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="scan-bar"></div>
+
+    <header>
+      <h1>Neo-Blocker 核心主控台</h1>
+      <div class="system-status">
+        <span></span>系統防護中
+      </div>
+    </header>
+
+    <div class="row">
+      <h3>[ 模組一：站點白名單 Whitelist ]</h3>
+      <textarea id="wl" placeholder="example.com"></textarea>
+      <div class="tip">每行一個網域。加入白名單後，該網域的所有子請求將不受任何防護規則限制。</div>
+    </div>
+
+    <div class="row">
+      <h3>[ 模組二：自訂封鎖規則 Custom Filters ]</h3>
+      <textarea id="filters" placeholder="例如：||example-adserver.com^"></textarea>
+      <div class="tip">每行一條 DNR 網址規則。建議僅使用 block/allow。規則若語法錯誤可能導致系統載入異常。</div>
+    </div>
+
+    <div class="row">
+      <h3>[ 模組三：防禦過濾模組配置 Shield Panels ]</h3>
+      <div class="shield-group">
+        
+        <div class="shield-item">
+          <div class="shield-info">
+            <span class="shield-name">[防線一] 基礎廣告防護 (Base Shield)</span>
+            <span class="shield-desc">攔截全球多數常見廣告、彈窗及網頁版面干擾因素 (EasyList)</span>
+          </div>
+          <label class="crt-switch">
+            <input type="checkbox" id="shield-base" checked>
+            <span class="crt-slider"></span>
+          </label>
+        </div>
+
+        <div class="shield-item">
+          <div class="shield-info">
+            <span class="shield-name">[防線二] 隱私與追蹤防護 (Privacy Shield)</span>
+            <span class="shield-desc">阻擋追蹤器、遙測數據收集，以及分析性第三方請求 (EasyPrivacy)</span>
+          </div>
+          <label class="crt-switch">
+            <input type="checkbox" id="shield-privacy" checked>
+            <span class="crt-slider"></span>
+          </label>
+        </div>
+
+        <div class="shield-item">
+          <div class="shield-info">
+            <span class="shield-name">[防線三] 中文地區優化 (Chinese Shield)</span>
+            <span class="shield-desc">加強過濾中文網站、社交分享工具及大中華區特有廣告 (EasyList China & cjxlist)</span>
+          </div>
+          <label class="crt-switch">
+            <input type="checkbox" id="shield-china" checked>
+            <span class="crt-slider"></span>
+          </label>
+        </div>
+
+      </div>
+      <div class="tip">調整後請點擊下方的「執行同步協定」按鈕，以寫入主控台韌體儲存區。</div>
+    </div>
+
+    <div class="controls">
+      <button id="save" disabled>載入防禦協定中...</button>
+      <span id="status"></span>
+    </div>
+  </div>
+
+  <script src="./options.ts" type="module"></script>
+</body>
+</html>

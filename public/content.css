@@ -1,0 +1,10 @@
+/* content.css（安全版）*/
+/* 僅瞄準常見廣告 iframe/容器；避免泛用 class 名稱 */
+iframe[id^="google_ads_iframe"],
+div[id^="google_ads_iframe"],
+ins.adsbygoogle,
+.google-auto-placed {
+  display: none !important;
+}
+
+/* 如果之後要擴充，請務必以「品牌/平台特徵」為主，而非 .ad/.ads 這種大殺器 */

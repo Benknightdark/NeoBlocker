@@ -1,0 +1,55 @@
+# ==== OS 垃圾檔 ====
+.DS_Store
+Thumbs.db
+Icon?
+*.swp
+*.swo
+
+# ==== Node ====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log
+
+# ==== 建置輸出/快取（若之後加入打包器）====
+dist/
+build/
+out/
+.tmp/
+.temp/
+.cache/
+.parcel-cache/
+.vite/
+.rollup.cache/
+webpack-stats*.json
+
+# ==== 測試/覆蓋率 ====
+coverage/
+.nyc_output/
+junit.xml
+
+# ==== 環境變數與機密 ====
+.env
+.env.*
+!.env.example
+
+# ==== 編輯器設定 ====
+.vscode/
+.idea/
+*.code-workspace
+
+# ==== Chrome 擴充打包產物 ====
+*.crx
+*.zip
+
+# ==== WXT ====
+.wxt/
+.output/
+
+# ==== EasyList 轉 MV3 規則輸出（保留你手寫的 ads-basic.json）====
+public/rules/static-*.json
+public/rules/MANIFEST_SNIPPET.json
+public/rules/BUILD_SUMMARY.txt
+public/rules/*.tmp.json
